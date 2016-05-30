@@ -1,5 +1,4 @@
 from __future__ import print_function
-from pyparsing import nestedExpr
 from collections import namedtuple
 from collections import defaultdict
 from functools import partial
@@ -116,99 +115,83 @@ command_equivalance = {
 #Happy emojis add one to the value at the location,
 #sad emojis subtract
 
-    '😃': board.increment,
-    '😄': board.increment,
-    '☹': board.decrement,
+    '😃': 'board.increment()',
+    '😄': 'board.increment()',
+    '☹': 'board.decrement()',
 
 #the joy emoji squares the value at the point
-    '😂': board.square,
+    '😂': 'board.square',
 
 #the scream emoji sets the x coordinate to zero
-    '😱': partial(board.set_x, 0),
+    '😱': 'partial(board.set_x, 0)()',
 
 #right and left pointing move right and left
-    '👉': board.move_right,
-    '👈': board.move_left,
+    '👉': 'board.move_right()',
+    '👈': 'board.move_left()',
 
 #middle finger moves up,
-    '🖕': board.move_up,
+    '🖕': 'board.move_up()',
 
 #pointing finger up moves up
-    '☝': board.move_up,
-    '👆': board.move_up,
-    '👍': board.move_up,
+    '☝': 'board.move_up()',
+    '👆': 'board.move_up()',
+    '👍': 'board.move_up()',
 
 #pointing down goes down
-    '👇': board.move_down,
-    '👎': board.move_down,
+    '👇': 'board.move_down()',
+    '👎': 'board.move_down()',
 
 #upleft arrow goes upleft
-    '↖': board.move_upleft,
+    '↖': 'board.move_upleft()',
 
 #upright arrow goes upright
-    '↗': board.move_upright,
+    '↗': 'board.move_upright()',
 
 #downright goes downright
-    '↘': board.move_downright,
+    '↘': 'board.move_downright()',
 
 #downleft goes downleft
-    '↙': board.move_downleft,
+    '↙': 'board.move_downleft()',
 
 #doubleup arrow goes two up
-    '⏫': partial(board.move_up, 2),
+    '⏫': 'partial(board.move_up, 2)()',
 
 #doubledown arrow goes down two
-    '⏬': partial(board.move_down, 2),
+    '⏬': 'partial(board.move_down, 2)()',
 
 #sleepy face waits for input then stores it in the cell
-    '😪': partial(set_value_one_char, board),
+    '😪': 'partial(set_value_one_char, board)()',
 
 #thinking face waits for a number
-    '🤔': partial(set_value_number,board),
+    '🤔': 'partial(set_value_number,board)()',
 
 #kissy face prints out the value as ASCII
-    '😘': board.print_as_ASCII,
+    '😘': 'board.print_as_ASCII()',
 
 #sun and full moon w/ face start and close loops 
 #where it loops if the value at the end is not zero
 #in this dictionary to simplify parsing
-    '🌞': 'while(data[x][y]){\n',
-    '☀': 'while(data[x][y]){\n',
-    '🌝': '}',
+    '🌞': 'while board.value != 0:',
+    '☀': 'while board.value != 0:',
+    '🌝': '',
 
 #winky face prints a newline
-    '😉': print,
+    '😉': 'print()',
 
 #open mouth suprised face waits for one char of input
-    '😮': partial(set_value_one_char, board),
+    '😮': 'partial(set_value_one_char, board)()',
 
 #poop emoji dumps the entire stack, not pretty, dont use
-    '💩': partial(print, board._cells),
+    '💩': 'partial(print, board._cells)()',
 
 #Die emoji puts a random value between 1 and 6 in the cell
-    '🎲': partial(board.set_value_randomly, 1, 7),
+    '🎲': 'partial(board.set_value_randomly, 1, 7)()',
 
 #nerd face prints out the value in the cell as a number
 #because nerds and numbers amiright
-    '🤓': board.print_value
+    '🤓': 'board.print_value()'
 }
 
-class Loop(object):
-    def __init__(self, commands):
-        self.commands = commands
-
-    def run(self, board):
-        print(self.commands)
-        for i in self.commands:
-            if type(i) == type(self):
-                i.run()
-                continue
-            else:
-                command_equivalance[i]()
-        if board.value == 0:
-            return
-        else:
-            self.run(board)
 
 def extract_emoji(filename):
     data = ''
@@ -221,40 +204,25 @@ def extract_emoji(filename):
         code+=i
     return code
 
+def make_py_code(code):
+    '''
+    alternative approach, generates and executes python code
+    '''
+    py_code = ''
+    indentation_level = 0
 
-def make_loops(code):
-    sun_indexes = []
-    moon_indexes = []
-    code = list(code)
     suns = ['🌞', '☀']
     moons = ['🌝']
-    final_code = []
-    
-    for command in code:
-        if command in (suns+moons):
-            break
-    else:
-        return code
 
-    counter = 0
-    for index, command in enumerate(code):
-        if command in suns:
-            sun_indexes.append(index)
-            counter+=1
-        elif command in moons:
-            moon_indexes.append(index)
-            counter-=1
-        if counter == 0 and command not in (moons+suns):
-            final_code.append(command)
-            return final_code + make_loops(code[index+1:])
+    for character in code:
+        py_code += '    ' * indentation_level + command_equivalance[character] + '\n'
+        if character in suns:
+            indentation_level += 1
+        if character in moons:
+            indentation_level -= 1
 
-        elif counter == 0:
-            return final_code + [Loop(code[sun_indexes[0]+1:moon_indexes[-1]])] + make_loops(code[moon_indexes[-1]+1:])
-    
-    print(final_code)
-    
-    if len(sun_indexes) != len(moon_indexes):
-        raise Exception("Suns do not equal moons, life is out of balance")
+    return py_code
+
     
     
     
@@ -262,12 +230,7 @@ def make_loops(code):
 
 
 if __name__ == '__main__':
-    a = make_loops(extract_emoji('examples/add.emoj'))
-
-    for i in a:
-        if type(i) != Loop:
-            command_equivalance[i]()
-        else:
-            i.run(board)
+    exec(make_py_code(extract_emoji('examples/add.emoj')))
+    
     pass
 
