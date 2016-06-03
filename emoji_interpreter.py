@@ -1,3 +1,4 @@
+
 from __future__ import print_function
 from collections import namedtuple
 from collections import defaultdict
@@ -5,13 +6,9 @@ from functools import partial
 import random
 import sys
 
-Location = namedtuple('Location',['x', 'y'])
+from utilities import getch
 
-def set_value_one_char(board):
-    board.value = ord(sys.stdin.read(1))
-
-def set_value_number(board):
-    board.value = int(input())
+Location = namedtuple('_Location',['x', 'y', 'z', 't'])
 
 class HappyField(object):
     '''
@@ -31,20 +28,30 @@ class HappyField(object):
         ############################################################
 
         self._cells = defaultdict(lambda: 0)
-        self._current_cell = Location(0,0)
+        self._current_cell = Location(0,0,0,0)
+        self._working_value = 0
+        self.output = sys.stdout
 
     def move_up(self, distance=1):
         self._current_cell = Location(self._current_cell.x,
-                                      self._current_cell.y+distance)
+                                      self._current_cell.y+distance,
+                                      self._current_cell.z,
+                                      self._current_cell.t)
     def move_down(self, distance=1):
         self._current_cell = Location(self._current_cell.x,
-                                      self._current_cell.y-distance)
+                                      self._current_cell.y-distance,
+                                      self._current_cell.z,
+                                      self._current_cell.t)
     def move_left(self, distance=1):
         self._current_cell = Location(self._current_cell.x-distance,
-                                      self._current_cell.y)
+                                      self._current_cell.y,
+                                      self._current_cell.z,
+                                      self._current_cell.t)
     def move_right(self, distance=1):
         self._current_cell = Location(self._current_cell.x+distance,
-                                      self._current_cell.y)
+                                      self._current_cell.y,
+                                      self._current_cell.z,
+                                      self._current_cell.t)
     def move_upleft(self):
         self.move_up()
         self.move_left()
@@ -72,16 +79,20 @@ class HappyField(object):
 
     def set_x(self, new_x):
         self._current_cell = Location(new_x,
-                                      self._current_cell.y)
+                                      self._current_cell.y,
+                                      self._current_cell.z,
+                                      self._current_cell.t)
 
     def get_y(self):
         return self._current_cell.y
 
     def set_y(self, new_y):
         self._current_cell = Location(self._current_cell.x,
-                                      new_y)
+                                      new_y,
+                                      self._current_cell.z,
+                                      self._current_cell.t)
     def print_as_ASCII(self):
-        print(chr(self.value), end='')
+        print(chr(self.value), end='', file=self.output)
 
     def square(self):
         self._cells[self._current_cell] = self._cells[self._current_cell]**2
@@ -89,8 +100,32 @@ class HappyField(object):
     def set_value_randomly(self, start=0, stop=2):
         self.value = random.randrange(start, stop)
     
+    def set_value_one_char(self):
+        self.value = ord(sys.stdin.read(1))
+
+    def store_string_horizontally(self):
+        string = input()
+        length = len(string)
+        for char in string:
+            self.value = ord(char)
+            self.current_cell = Location(self.current_cell.x+1,
+                                         self.current_cell.y,
+                                         self.current_cell.z,
+                                         self.current_cell.t)
+        self.value = 0
+
+        self.current_cell = Location(self.current_cell.x-length,
+                                     self.current_cell.y,
+                                     self.current_cell.z,
+                                     self.current_cell.t)
+
+        
+
     def print_value(self):
-        print(self.value, end='')
+        print(self.value, end='', file=self.output)
+    
+    def set_value_number(self):
+        self.value = int(input())
 
     def get_value(self):
         return self._cells[self._current_cell]
@@ -103,6 +138,14 @@ class HappyField(object):
     
     def set_current_cell(self, new_cell):
         self._current_cell = new_cell
+
+    def get_working_value(self):
+        return self._working_value
+
+    def set_working_value(self, new_value):
+        self._working_value = new_value
+
+    working_value = property(get_working_value, set_working_value)
 
     current_cell = property(get_current_cell, set_current_cell)
 
@@ -120,7 +163,7 @@ command_equivalance = {
     '☹': 'board.decrement()',
 
 #the joy emoji squares the value at the point
-    '😂': 'board.square',
+    '😂': 'board.square()',
 
 #the scream emoji sets the x coordinate to zero
     '😱': 'partial(board.set_x, 0)()',
@@ -160,10 +203,10 @@ command_equivalance = {
     '⏬': 'partial(board.move_down, 2)()',
 
 #sleepy face waits for input then stores it in the cell
-    '😪': 'partial(set_value_one_char, board)()',
+    '😪': 'board.set_value_one_char()',
 
 #thinking face waits for a number
-    '🤔': 'partial(set_value_number,board)()',
+    '🤔': 'board.set_value_number()',
 
 #kissy face prints out the value as ASCII
     '😘': 'board.print_as_ASCII()',
@@ -176,10 +219,11 @@ command_equivalance = {
     '🌝': '',
 
 #winky face prints a newline
-    '😉': 'print()',
+    '😉': 'print(file=board.output)',
 
-#open mouth suprised face waits for one char of input
-    '😮': 'partial(set_value_one_char, board)()',
+#open mouth suprised face waits for a string and stores it horizontally
+#making sure that there is one zero at the end
+    '😮': 'board.store_string_horizontally()',
 
 #poop emoji dumps the entire stack, not pretty, dont use
     '💩': 'partial(print, board._cells)()',
@@ -189,7 +233,13 @@ command_equivalance = {
 
 #nerd face prints out the value in the cell as a number
 #because nerds and numbers amiright
-    '🤓': 'board.print_value()'
+    '🤓': 'board.print_value()',
+
+#construction worker sets the working value as the value in the current cell
+    '👷': 'board.working_value = board.value',
+
+#man and woman holding hands adds the current cell to the working value and stores that in the cell
+    '👫': 'board.value += board.working_value'
 }
 
 
@@ -230,7 +280,4 @@ def make_py_code(code):
 
 
 if __name__ == '__main__':
-    exec(make_py_code(extract_emoji('examples/add.emoj')))
-    
-    pass
-
+    exec(make_py_code(extract_emoji(sys.argv[1])))
