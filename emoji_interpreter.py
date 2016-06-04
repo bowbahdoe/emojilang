@@ -52,6 +52,18 @@ class HappyField(object):
                                       self._current_cell.y,
                                       self._current_cell.z,
                                       self._current_cell.t)
+
+    def move_out(self, distance=1):
+        self._current_cell = Location(self._current_cell.x,
+                                      self._current_cell.y,
+                                      self._current_cell.z+distance,
+                                      self._current_cell.t)
+
+    def move_back(self, distance=1):
+        self._current_cell = Location(self._current_cell.x,
+                                      self._current_cell.y,
+                                      self._current_cell.z-distance,
+                                      self._current_cell.t)
     def move_upleft(self):
         self.move_up()
         self.move_left()
@@ -78,19 +90,27 @@ class HappyField(object):
         return self._current_cell.x
 
     def set_x(self, new_x):
-        self._current_cell = Location(new_x,
-                                      self._current_cell.y,
-                                      self._current_cell.z,
-                                      self._current_cell.t)
+        self.current_cell = Location(new_x,
+                                     self._current_cell.y,
+                                     self._current_cell.z,
+                                     self._current_cell.t)
 
     def get_y(self):
-        return self._current_cell.y
+        return self.current_cell.y
 
     def set_y(self, new_y):
-        self._current_cell = Location(self._current_cell.x,
-                                      new_y,
-                                      self._current_cell.z,
-                                      self._current_cell.t)
+        self.current_cell = Location(self._current_cell.x,
+                                     new_y,
+                                     self._current_cell.z,
+                                     self._current_cell.t)
+    def get_z(self):
+        return self.current_cell.z
+    def set_z(self, new_z):
+        self.current_cell = Location(self._current_cell.x,
+                                     self._current_cell.y,
+                                     new_z,
+                                     self._current_cell.t)
+        
     def print_as_ASCII(self):
         print(chr(self.value), end='', file=self.output)
 
@@ -116,6 +136,22 @@ class HappyField(object):
 
         self.current_cell = Location(self.current_cell.x-length,
                                      self.current_cell.y,
+                                     self.current_cell.z,
+                                     self.current_cell.t)
+
+    def store_string_vertically(self):
+        string = input()
+        length = len(string)
+        for char in string:
+            self.value = ord(char)
+            self.current_cell = Location(self.current_cell.x,
+                                         self.current_cell.y+1,
+                                         self.current_cell.z,
+                                         self.current_cell.t)
+        self.value = 0
+
+        self.current_cell = Location(self.current_cell.x,
+                                     self.current_cell.y-length,
                                      self.current_cell.z,
                                      self.current_cell.t)
 
@@ -202,8 +238,14 @@ command_equivalance = {
 #doubledown arrow goes down two
     '⏬': 'partial(board.move_down, 2)()',
 
-#sleepy face waits for input then stores it in the cell
-    '😪': 'board.set_value_one_char()',
+#punching fist increases z by one
+    '👊': 'board.move_out()'
+
+#okay sign decreases z by one
+    '👌': 'board.move_back()'
+
+#sleepy face waits for input then stores it vertically as a string
+    '😪': 'board.store_string_vertically()',
 
 #thinking face waits for a number
     '🤔': 'board.set_value_number()',
@@ -238,9 +280,18 @@ command_equivalance = {
 #construction worker sets the working value as the value in the current cell
     '👷': 'board.working_value = board.value',
 
-#man and woman holding hands adds the current cell to the working value and stores that in the cell
-    '👫': 'board.value += board.working_value'
+#two people holding hands adds the current cell to the working value and stores that in the cell
+    '👫': 'board.value += board.working_value',
+    '👬': 'board.value += board.working_value',
+    '👭': 'board.value += board.working_value',
+
+#two people kissing multiplies the current cell to the working value and stores that in the cell
+    '💏': 'board.value *= board.working_value',
 }
+
+#we convert it to a default dict to deal with moons, since they are repetitive and all return nothing
+
+command_equivalance = defaultdict(lambda: '', command_equivalance)
 
 
 def extract_emoji(filename):
@@ -262,7 +313,9 @@ def make_py_code(code):
     indentation_level = 0
 
     suns = ['🌞', '☀']
-    moons = ['🌝']
+    moons = ['🌝', '🌑', '🌒', '🌓', \
+             '🌔', '🌕', '🌖', '🌗', \
+             '🌘', '🌙', '🌛', '🌜']
 
     for character in code:
         py_code += '    ' * indentation_level + command_equivalance[character] + '\n'
