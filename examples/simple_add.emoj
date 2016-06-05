@@ -1,0 +1,10 @@
+This does the adding via the holding hands command, which
+is faster than the other method, since it does not require long
+iteration
+
+🤔 Gets the First Number
+👷 Stores it as our working value
+🤔 Gets second number
+👫 Add the two numbers
+🤓 Display the result
+😉 Print a newline

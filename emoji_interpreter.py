@@ -155,7 +155,6 @@ class HappyField(object):
                                      self.current_cell.z,
                                      self.current_cell.t)
 
-        
 
     def print_value(self):
         print(self.value, end='', file=self.output)
@@ -239,10 +238,10 @@ command_equivalance = {
     '⏬': 'partial(board.move_down, 2)()',
 
 #punching fist increases z by one
-    '👊': 'board.move_out()'
+    '👊': 'board.move_out()',
 
 #okay sign decreases z by one
-    '👌': 'board.move_back()'
+    '👌': 'board.move_back()',
 
 #sleepy face waits for input then stores it vertically as a string
     '😪': 'board.store_string_vertically()',
@@ -286,7 +285,7 @@ command_equivalance = {
     '👭': 'board.value += board.working_value',
 
 #two people kissing multiplies the current cell to the working value and stores that in the cell
-    '💏': 'board.value *= board.working_value',
+    '💏': 'board.value *= board.working_value'
 }
 
 #we convert it to a default dict to deal with moons, since they are repetitive and all return nothing
@@ -317,6 +316,22 @@ def make_py_code(code):
              '🌔', '🌕', '🌖', '🌗', \
              '🌘', '🌙', '🌛', '🌜']
 
+    used_flags = []
+    possible_flags = []
+
+    with open('flags.txt', 'r') as flags_file:
+        for line in flags_file:
+            possible_flags += line.split(' ')
+    
+    #for some reason split adds a newline to the last flag so we get rid of it here
+    possible_flags[-1] = possible_flags[-1][:-1]
+    
+    for flag in possible_flags:
+        if flag in code:
+            code.replace(flag,ord(flag))
+            print(ord(flag))
+
+    print(code)
     for character in code:
         py_code += '    ' * indentation_level + command_equivalance[character] + '\n'
         if character in suns:
