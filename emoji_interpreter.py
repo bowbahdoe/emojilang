@@ -329,9 +329,7 @@ def make_py_code(code):
     for flag in possible_flags:
         if flag in code:
             code.replace(flag,ord(flag))
-            print(ord(flag))
 
-    print(code)
     for character in code:
         py_code += '    ' * indentation_level + command_equivalance[character] + '\n'
         if character in suns:
@@ -340,11 +338,6 @@ def make_py_code(code):
             indentation_level -= 1
 
     return py_code
-
-    
-    
-    
-    
 
 
 if __name__ == '__main__':
