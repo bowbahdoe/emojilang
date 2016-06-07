@@ -1,44 +1,13 @@
-This multiplies two numbers
-
-
+Get the two numbers
 🤔👉🤔
 
-gets the two numbers and stores them in the first two cells
+Set the second number as our working number
+👷
 
-Now we duplicate the second number three times above the first
-This also zeroes the second number
+Then repeatedly add the working number to itself
+👈☹🌞👉👫👈☹🌝
 
-🌞↖😃↘☹🌝
 
-Now we move back to the first
+👉🤓😉
 
-👈
 
-and we duplicate that number two above
-
-🌞⏫😃👍😃👎👎👎☹🌝
-
-and get rid of the temp
-
-👍👍👍🌞👎👎👎😃👍👍👍☹🌝👎👎👎
-
-👍
-🌞
-    🌞
-        ☹👉😃👉😃    
-    🌝
-    👈👈
-    🌞
-      ☹👎😃👍
-    🌝
-
-    👉👉
-    🌞
-        👈👈😃👉👉☹
-    🌝👈👈
-    
-    👍☹
-  
-🌝
-
-🤓
