@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3
 from __future__ import print_function
 from collections import namedtuple
 from collections import defaultdict
@@ -6,14 +6,12 @@ from functools import partial
 import random
 import sys
 
-from utilities import getch
 
 Location = namedtuple('_Location',['x', 'y', 'z', 't'])
 
-class HappyField(object):
+class MemoryState(object):
     '''
-    The happiness field keeps track of all the
-    happiness values in the board
+    Stores the state of the computation
     '''
     def __init__(self):
         '''
@@ -32,59 +30,6 @@ class HappyField(object):
         self._working_value = 0
         self.output = sys.stdout
 
-    def move_up(self, distance=1):
-        self._current_cell = Location(self._current_cell.x,
-                                      self._current_cell.y+distance,
-                                      self._current_cell.z,
-                                      self._current_cell.t)
-    def move_down(self, distance=1):
-        self._current_cell = Location(self._current_cell.x,
-                                      self._current_cell.y-distance,
-                                      self._current_cell.z,
-                                      self._current_cell.t)
-    def move_left(self, distance=1):
-        self._current_cell = Location(self._current_cell.x-distance,
-                                      self._current_cell.y,
-                                      self._current_cell.z,
-                                      self._current_cell.t)
-    def move_right(self, distance=1):
-        self._current_cell = Location(self._current_cell.x+distance,
-                                      self._current_cell.y,
-                                      self._current_cell.z,
-                                      self._current_cell.t)
-
-    def move_out(self, distance=1):
-        self._current_cell = Location(self._current_cell.x,
-                                      self._current_cell.y,
-                                      self._current_cell.z+distance,
-                                      self._current_cell.t)
-
-    def move_back(self, distance=1):
-        self._current_cell = Location(self._current_cell.x,
-                                      self._current_cell.y,
-                                      self._current_cell.z-distance,
-                                      self._current_cell.t)
-    def move_upleft(self):
-        self.move_up()
-        self.move_left()
-
-    def move_upright(self):
-        self.move_up()
-        self.move_right()
-
-    def move_downleft(self):
-        self.move_down()
-        self.move_left()
-
-    def move_downright(self):
-        self.move_down()
-        self.move_right()
-
-    def increment(self):
-        self._cells[self._current_cell] += 1
-    
-    def decrement(self):
-        self._cells[self._current_cell] -= 1
     
     def get_x(self):
         return self._current_cell.x
@@ -105,23 +50,32 @@ class HappyField(object):
                                      self._current_cell.t)
     def get_z(self):
         return self.current_cell.z
+
     def set_z(self, new_z):
         self.current_cell = Location(self._current_cell.x,
                                      self._current_cell.y,
                                      new_z,
                                      self._current_cell.t)
+
+
+    def get_time(self):
+        return self.current_cell.t
+
+    def set_time(self, new_time):
+        self.current_cell = Location(self._current_cell.x,
+                                     self._current_cell.y,
+                                     self._current_cell.z,
+                                     new_time)
         
+
+    #sets up the dimensions as properties    
+    x = property(get_x, set_x)
+    y = property(get_y, set_y)
+    z = property(get_z, set_z)
+    t = property(get_time, set_time)
+
     def print_as_ASCII(self):
         print(chr(self.value), end='', file=self.output)
-
-    def square(self):
-        self._cells[self._current_cell] = self._cells[self._current_cell]**2
-    
-    def set_value_randomly(self, start=0, stop=2):
-        self.value = random.randrange(start, stop)
-    
-    def set_value_one_char(self):
-        self.value = ord(sys.stdin.read(1))
 
     def store_string_horizontally(self):
         string = input()
@@ -186,62 +140,130 @@ class HappyField(object):
 
     value = property(get_value, set_value)
 
-board = HappyField()
+board = MemoryState()
 
 command_equivalance = {
 
 #Happy emojis add one to the value at the location,
 #sad emojis subtract
 
-    '😃': 'board.increment()',
-    '😄': 'board.increment()',
-    '☹': 'board.decrement()',
+    '😃': 'board.value += 1',
+    '😄': 'board.value += 1',
+    '☹': 'board.value -= 1',
+
+#Fruits and veggies add one, unhealthy foods subtract
+    '🍏': 'board.value += 1',
+    '🍎': 'board.value += 1',
+    '🍐': 'board.value += 1',
+    '🍊': 'board.value += 1',
+    '🍋': 'board.value += 1',
+    '🍌': 'board.value += 1',
+    '🍉': 'board.value += 1',
+    '🍇': 'board.value += 1',
+    '🍓': 'board.value += 1',
+    '🍈': 'board.value += 1',
+    '🍒': 'board.value += 1',
+    '🍑': 'board.value += 1',
+    '🍍': 'board.value += 1',
+    '🍅': 'board.value += 1',
+    '🍆': 'board.value += 1',
+    '🌶': 'board.value += 1',
+    '🌽': 'board.value += 1',
+
+
+    '🍠': 'board.value -= 1',
+    '🍯': 'board.value -= 1',
+    '🍞': 'board.value -= 1',
+    '🧀': 'board.value -= 1',
+    '🍗': 'board.value -= 1',
+    '🍖': 'board.value -= 1',
+    '🍤': 'board.value -= 1',
+    #we count the cooking emoji as unhealthy since it has a fried egg 
+    '🍳': 'board.value -= 1',
+    '🍔': 'board.value -= 1',
+    '🍟': 'board.value -= 1',
+    '🌭': 'board.value -= 1',
+    '🍕': 'board.value -= 1',
+    '🍝': 'board.value -= 1',
+    '🌮': 'board.value -= 1',
+    '🌯': 'board.value -= 1',
+    '🍜': 'board.value -= 1',
+    #Pot of food is unhealthy because it is a large serving size
+    '🍲': 'board.value -= 1',
+    '🍥': 'board.value -= 1',
+    '🍣': 'board.value -= 1',
+    '🍱': 'board.value -= 1',
+    '🍛': 'board.value -= 1',
+    '🍙': 'board.value -= 1',
+    '🍚': 'board.value -= 1',
+    '🍘': 'board.value -= 1',
+    '🍢': 'board.value -= 1',
+    '🍡': 'board.value -= 1',
+    '🍧': 'board.value -= 1',
+    '🍨': 'board.value -= 1',
+    '🍦': 'board.value -= 1',
+    '🍰': 'board.value -= 1',
+    '🎂': 'board.value -= 1',
+    '🍮': 'board.value -= 1',
+    '🍬': 'board.value -= 1',
+    '🍭': 'board.value -= 1',
+    '🍫': 'board.value -= 1',
+    '🍿': 'board.value -= 1',
+    '🍩': 'board.value -= 1',
+    '🍪': 'board.value -= 1',
+    #alcohol is really bad for you, so it subtracts 10
+    '🍺': 'board.value -= 10',
+    '🍻': 'board.value -= 10',
+    '🍷': 'board.value -= 10',
+    '🍸': 'board.value -= 10',
+    '🍹': 'board.value -= 10',
+    '🍾': 'board.value -= 10',
 
 #the joy emoji squares the value at the point
-    '😂': 'board.square()',
+    '😂': 'board.value **= 2',
 
 #the scream emoji sets the x coordinate to zero
-    '😱': 'partial(board.set_x, 0)()',
+    '😱': 'board.x = 0',
 
 #right and left pointing move right and left
-    '👉': 'board.move_right()',
-    '👈': 'board.move_left()',
+    '👉': 'board.x += 1',
+    '👈': 'board.x -= 1',
 
 #middle finger moves up,
-    '🖕': 'board.move_up()',
+    '🖕': 'board.y += 1',
 
 #pointing finger up moves up
-    '☝': 'board.move_up()',
-    '👆': 'board.move_up()',
-    '👍': 'board.move_up()',
+    '☝': 'board.y += 1',
+    '👆': 'board.y += 1',
+    '👍': 'board.y += 1',
 
 #pointing down goes down
-    '👇': 'board.move_down()',
-    '👎': 'board.move_down()',
+    '👇': 'board.y -= 1',
+    '👎': 'board.y -= 1',
 
 #upleft arrow goes upleft
-    '↖': 'board.move_upleft()',
+    '↖': 'board.y += 1; board.x -= 1',
 
 #upright arrow goes upright
-    '↗': 'board.move_upright()',
+    '↗': 'board.y += 1; board.x += 1',
 
 #downright goes downright
-    '↘': 'board.move_downright()',
+    '↘': 'board.y -= 1; board.x += 1',
 
 #downleft goes downleft
-    '↙': 'board.move_downleft()',
+    '↙': 'board.y -= 1; board.x -= 1',
 
 #doubleup arrow goes two up
-    '⏫': 'partial(board.move_up, 2)()',
+    '⏫': 'board.y += 2',
 
 #doubledown arrow goes down two
-    '⏬': 'partial(board.move_down, 2)()',
+    '⏬': 'board.y -= 2',
 
 #punching fist increases z by one
-    '👊': 'board.move_out()',
+    '👊': 'board.z += 1',
 
 #okay sign decreases z by one
-    '👌': 'board.move_back()',
+    '👌': 'board.z -= 1',
 
 #sleepy face waits for input then stores it vertically as a string
     '😪': 'board.store_string_vertically()',
@@ -270,7 +292,7 @@ command_equivalance = {
     '💩': 'partial(print, board._cells)()',
 
 #Die emoji puts a random value between 1 and 6 in the cell
-    '🎲': 'partial(board.set_value_randomly, 1, 7)()',
+    '🎲': 'board.value = random.randrange(1, 7)',
 
 #nerd face prints out the value in the cell as a number
 #because nerds and numbers amiright
@@ -285,7 +307,25 @@ command_equivalance = {
     '👭': 'board.value += board.working_value',
 
 #two people kissing multiplies the current cell to the working value and stores that in the cell
-    '💏': 'board.value *= board.working_value'
+    '💏': 'board.value *= board.working_value',
+
+#hourglass and clocks go forwards in time
+    '⌛': 'board.t += 1',
+    '⏳': 'board.t += 1',
+    '⏱': 'board.t += 1',
+    '⏰': 'board.t += 1',
+    '⌚': 'board.t += 1',
+    '⏲': 'board.t += 1',
+    '🕰': 'board.t += 1',
+
+#The Man in buisness suit levitating goes back in time
+    '🕴': 'board.t -= 1',
+
+#four leafed clover puts a random value between the current value
+#and zero
+    '🍀': 'board.value = random.randrange(1, board.value)'
+
+
 }
 
 #we convert it to a default dict to deal with moons, since they are repetitive and all return nothing
@@ -338,7 +378,7 @@ def make_py_code(code):
             indentation_level -= 1
 
     return py_code
-
-
+def main():
+    exec(make_py_code(extract_emoji(sys.argv[1])))
 if __name__ == '__main__':
     exec(make_py_code(extract_emoji(sys.argv[1])))
