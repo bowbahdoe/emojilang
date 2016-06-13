@@ -94,280 +94,278 @@ class MemoryState(object):
             self.y += 1
         self.value = 0
         self.y -= length
-
-    def print_value(self):
-        print(self.value, end='', file=self.output)
     
     def set_value_number(self):
         self.value = int(input())
 
-    def get_value(self):
+    def _get_value(self):
         return self._cells[self._current_cell]
 
-    def set_value(self, new_value):
+    def _set_value(self, new_value):
         self._cells[self._current_cell] = new_value
     
-    def get_current_cell(self):
+    def _get_current_cell(self):
         return self._current_cell
     
-    def set_current_cell(self, new_cell):
+    def _set_current_cell(self, new_cell):
         self._current_cell = new_cell
 
-    def get_working_value(self):
+    def _get_working_value(self):
         return self._working_value
 
-    def set_working_value(self, new_value):
+    def _set_working_value(self, new_value):
         self._working_value = new_value
 
-    working_value = property(get_working_value, set_working_value)
+    working_value = property(_get_working_value, _set_working_value)
 
-    current_cell = property(get_current_cell, set_current_cell)
+    current_cell = property(_get_current_cell, _set_current_cell)
 
-    value = property(get_value, set_value)
+    value = property(_get_value, _set_value)
 
-board = MemoryState()
+class Interpreter(MemoryState):
+    def __init__(self):
+        '''
+        Initializes the interpreter
+        
+        also builds the list of commands
+        '''
+        
+        super().__init__()
 
-command_equivalance = {
+        self.equivalents = {}
+        
+        ######################################################
+        # Happy emojis add one to the value at the location, #
+        # sad emojis subtract                                #
+        ######################################################
+        self.add_commands('self.value += 1', '😃', '😄')
+        self.add_commands('self.value -= 1', '☹')
 
-#Happy emojis add one to the value at the location,
-#sad emojis subtract
+        ########################################################
+        # Fruits and veggies add one, unhealthy foods subtract #
+        ########################################################
+        self.add_commands('self.value += 1', '🍏', '🍎', '🍐', '🍊',
+                                             '🍋', '🍌', '🍉', '🍇',
+                                             '🍓', '🍈', '🍒', '🍑',
+                                             '🍍', '🍅', '🍆', '🌶',
+                                             '🌽')
 
-    '😃': 'board.value += 1',
-    '😄': 'board.value += 1',
-    '☹': 'board.value -= 1',
+        self.add_commands('self.value -= 1', '🍠', '🍯', '🍞', '🧀',
+                                             '🍗', '🍖', '🍤', '🍳',
+                                             '🍔', '🍟', '🌭', '🍕',
+                                             '🍝', '🌮', '🌯', '🍜',
+                                             '🍲', '🍥', '🍣', '🍱',
+                                             '🍛', '🍙', '🍚', '🍘',
+                                             '🍢', '🍡', '🍧', '🍨',
+                                             '🍦', '🍰', '🎂', '🍮',
+                                             '🍬', '🍭', '🍫', '🍿',
+                                             '🍩', '🍪')
 
-#Fruits and veggies add one, unhealthy foods subtract
-    '🍏': 'board.value += 1',
-    '🍎': 'board.value += 1',
-    '🍐': 'board.value += 1',
-    '🍊': 'board.value += 1',
-    '🍋': 'board.value += 1',
-    '🍌': 'board.value += 1',
-    '🍉': 'board.value += 1',
-    '🍇': 'board.value += 1',
-    '🍓': 'board.value += 1',
-    '🍈': 'board.value += 1',
-    '🍒': 'board.value += 1',
-    '🍑': 'board.value += 1',
-    '🍍': 'board.value += 1',
-    '🍅': 'board.value += 1',
-    '🍆': 'board.value += 1',
-    '🌶': 'board.value += 1',
-    '🌽': 'board.value += 1',
+        #####################################################
+        # alcohol is really bad for you, so it subtracts 10 #
+        #####################################################
 
+        self.add_commands('self.value -= 10', '🍺','🍻','🍷','🍸',
+                                              '🍹','🍾')
 
-    '🍠': 'board.value -= 1',
-    '🍯': 'board.value -= 1',
-    '🍞': 'board.value -= 1',
-    '🧀': 'board.value -= 1',
-    '🍗': 'board.value -= 1',
-    '🍖': 'board.value -= 1',
-    '🍤': 'board.value -= 1',
-    #we count the cooking emoji as unhealthy since it has a fried egg 
-    '🍳': 'board.value -= 1',
-    '🍔': 'board.value -= 1',
-    '🍟': 'board.value -= 1',
-    '🌭': 'board.value -= 1',
-    '🍕': 'board.value -= 1',
-    '🍝': 'board.value -= 1',
-    '🌮': 'board.value -= 1',
-    '🌯': 'board.value -= 1',
-    '🍜': 'board.value -= 1',
-    #Pot of food is unhealthy because it is a large serving size
-    '🍲': 'board.value -= 1',
-    '🍥': 'board.value -= 1',
-    '🍣': 'board.value -= 1',
-    '🍱': 'board.value -= 1',
-    '🍛': 'board.value -= 1',
-    '🍙': 'board.value -= 1',
-    '🍚': 'board.value -= 1',
-    '🍘': 'board.value -= 1',
-    '🍢': 'board.value -= 1',
-    '🍡': 'board.value -= 1',
-    '🍧': 'board.value -= 1',
-    '🍨': 'board.value -= 1',
-    '🍦': 'board.value -= 1',
-    '🍰': 'board.value -= 1',
-    '🎂': 'board.value -= 1',
-    '🍮': 'board.value -= 1',
-    '🍬': 'board.value -= 1',
-    '🍭': 'board.value -= 1',
-    '🍫': 'board.value -= 1',
-    '🍿': 'board.value -= 1',
-    '🍩': 'board.value -= 1',
-    '🍪': 'board.value -= 1',
-    #alcohol is really bad for you, so it subtracts 10
-    '🍺': 'board.value -= 10',
-    '🍻': 'board.value -= 10',
-    '🍷': 'board.value -= 10',
-    '🍸': 'board.value -= 10',
-    '🍹': 'board.value -= 10',
-    '🍾': 'board.value -= 10',
+        ################################################
+        # the joy emoji squares the value at the point #
+        ################################################
 
-#the joy emoji squares the value at the point
-    '😂': 'board.value **= 2',
+        self.add_commands('self.value **= 2', '😂')
 
-#the scream emoji sets the x coordinate to zero
-    '😱': 'board.x = 0',
+        ##############################################    
+        # construction worker sets the working value #
+        # as the value in the current cell           #
+        ##############################################
 
-#right and left pointing move right and left
-    '👉': 'board.x += 1',
-    '👈': 'board.x -= 1',
+        self.add_commands('self.working_value = self.value', '👷')
 
-#middle finger moves up,
-    '🖕': 'board.y += 1',
+        ##################################################
+        # the scream emoji sets the x coordinate to zero #
+        ##################################################
+        self.add_commands('self.x = 0', '😱')
 
-#pointing finger up moves up
-    '☝': 'board.y += 1',
-    '👆': 'board.y += 1',
-    '👍': 'board.y += 1',
+        ###############################################
+        # right and left pointing move right and left #
+        ###############################################
+        self.add_commands('self.x += 1', '👉')
+        self.add_commands('self.x -= 1', '👈')
 
-#pointing down goes down
-    '👇': 'board.y -= 1',
-    '👎': 'board.y -= 1',
+        ################################################
+        # pointing up goes up, pointing down goes down #
+        ################################################
 
-#upleft arrow goes upleft
-    '↖': 'board.y += 1; board.x -= 1',
+        self.add_commands('self.y += 1', '🖕', '☝', '👆', '👍')
+        self.add_commands('self.y -= 1', '👇', '👎')
 
-#upright arrow goes upright
-    '↗': 'board.y += 1; board.x += 1',
+        ######################################
+        # upleft arrow goes upleft and so on #
+        ######################################
+        self.add_commands('self.y += 1; self.x -= 1', '↖')
+        self.add_commands('self.y += 1; self.x += 1', '↗')
+        self.add_commands('self.y += 1; self.x += 1', '↗')
+        self.add_commands('self.y -= 1; self.x += 1', '↘')
+        self.add_commands('self.y -= 1; self.x -= 1', '↙')
 
-#downright goes downright
-    '↘': 'board.y -= 1; board.x += 1',
+        ######################################################
+        # double arrows move two in the direction they point #
+        ######################################################
 
-#downleft goes downleft
-    '↙': 'board.y -= 1; board.x -= 1',
+        self.add_commands('self.y += 2', '⏫')
+        self.add_commands('self.y -= 2', '⏬')
 
-#doubleup arrow goes two up
-    '⏫': 'board.y += 2',
+        ####################################
+        # punching fist increases z by one #
+        # okay sign decreases z by one     #
+        ####################################
 
-#doubledown arrow goes down two
-    '⏬': 'board.y -= 2',
+        self.add_commands('self.z += 1', '👊')
+        self.add_commands('self.z -= 1', '👌')
 
-#punching fist increases z by one
-    '👊': 'board.z += 1',
+        #########################################################
+        # hourglass and clocks go forwards in time              #
+        # The Man in buisness suit levitating goes back in time #
+        #########################################################
+        
+        self.add_commands('self.t += 1', '⌛', '⏳', '⏱', '⏰', 
+                                          '⌚', '⏲', '🕰')
+        self.add_commands('self.t -= 1', '🕴')
 
-#okay sign decreases z by one
-    '👌': 'board.z -= 1',
+        ######################################################
+        # sleepy face and open mouth surprised face store    #
+        # strings vertically and horizontally respectively   #
+        #                                                    #
+        # when strings are stored the cell immediately after #
+        # the string is zeroed (Just like a null terminated  #
+        # string)                                            #
+        ######################################################
+        
+        self.add_commands('self.store_string_vertically()', '😪')
+        self.add_commands('self.store_string_horizontally()', '😮')
 
-#sleepy face waits for input then stores it vertically as a string
-    '😪': 'board.store_string_vertically()',
+        #########################################################
+        # thinking face waits for a number and stores it in the #
+        # current cell                                          #
+        #########################################################
 
-#thinking face waits for a number
-    '🤔': 'board.set_value_number()',
+        self.add_commands('self.set_value_number()', '🤔')
 
-#kissy face prints out the value as ASCII
-    '😘': 'board.print_as_ASCII()',
+        ##################################################
+        # four leafed clover puts a random value between #
+        # the current value and zero (inclusive)         #
+        #                                                #
+        # The die emoji puts a random number between 1   #
+        # and 6 in the cell                              #
+        ##################################################
 
-#sun and full moon w/ face start and close loops 
-#where it loops if the value at the end is not zero
-#in this dictionary to simplify parsing
-    '🌞': 'while board.value != 0:',
-    '☀': 'while board.value != 0:',
-    '🌝': '',
+        self.add_commands('self.value = random.randrange(0, self.value + 1)', '🍀')
+        self.add_commands('self.value = random.randrange(1, 7)','🎲')
 
-#winky face prints a newline
-    '😉': 'print(file=board.output)',
+        ##############################################
+        # construction worker sets the working value #
+        # as the value in the current cell           #
+        ##############################################
 
-#open mouth suprised face waits for a string and stores it horizontally
-#making sure that there is one zero at the end
-    '😮': 'board.store_string_horizontally()',
+        self.add_commands('self.working_value = self.value','👷')
 
-#poop emoji dumps the entire stack, not pretty, dont use
-    '💩': 'partial(print, board._cells)()',
+        ####################################################
+        # two people holding hands adds the current cell   #
+        # to the working value and stores that in the cell #
+        ####################################################
+        
+        self.add_commands('self.value += self.working_value',
+                          '👫', '👬', '👭')
 
-#Die emoji puts a random value between 1 and 6 in the cell
-    '🎲': 'board.value = random.randrange(1, 7)',
+        ####################################################
+        # two people kissing multiplies the current cell   #
+        # to the working value and stores that in the cell #
+        ####################################################
 
-#nerd face prints out the value in the cell as a number
-#because nerds and numbers amiright
-    '🤓': 'board.print_value()',
-
-#construction worker sets the working value as the value in the current cell
-    '👷': 'board.working_value = board.value',
-
-#two people holding hands adds the current cell to the working value and stores that in the cell
-    '👫': 'board.value += board.working_value',
-    '👬': 'board.value += board.working_value',
-    '👭': 'board.value += board.working_value',
-
-#two people kissing multiplies the current cell to the working value and stores that in the cell
-    '💏': 'board.value *= board.working_value',
-
-#hourglass and clocks go forwards in time
-    '⌛': 'board.t += 1',
-    '⏳': 'board.t += 1',
-    '⏱': 'board.t += 1',
-    '⏰': 'board.t += 1',
-    '⌚': 'board.t += 1',
-    '⏲': 'board.t += 1',
-    '🕰': 'board.t += 1',
-
-#The Man in buisness suit levitating goes back in time
-    '🕴': 'board.t -= 1',
-
-#four leafed clover puts a random value between the current value
-#and zero
-    '🍀': 'board.value = random.randrange(1, board.value)'
+        self.add_commands('self.value *= self.working_value', '💏')
 
 
-}
+        ######################################################
+        # sun and full moon w/ face start and close loops    # 
+        # where it loops if the value at the end is not zero #
+        #                                                    #
+        # logic of moons is dealt with with decrementing     #
+        # indents so we dont worry about it here and just    #
+        # add it to the list of commands                     #
+        #                                                    #
+        ######################################################
 
-#we convert it to a default dict to deal with moons, since they are repetitive and all return nothing
+        self.add_commands('while self.value != 0:', '🌞', '☀')
+        self.add_commands('', '🌝', '🌑', '🌒', '🌓', 
+                              '🌔', '🌕', '🌖', '🌗',
+                              '🌘', '🌙', '🌛', '🌜')
+        ##########################################################
+        # Kissy face prints out the value as ASCII               #
+        # Winky face prints a newline                            #
+        # Nerd face prints out the value in the cell as a number #
+        # because nerds and numbers amiright                     #
+        ##########################################################
 
-command_equivalance = defaultdict(lambda: '', command_equivalance)
+        self.add_commands('self.print_as_ASCII()', '😘')
+        self.add_commands('print(file=self.output)', '😉')
+        self.add_commands('print(self.value, end=\'\', file=self.output)', '🤓')
 
-#Adds the moons to the dictionary
-[command_equivalance[i] for i in ['🌝', '🌑', '🌒', '🌓', \
-                                  '🌔', '🌕', '🌖', '🌗', \
-                                  '🌘', '🌙', '🌛', '🌜']]
+        ###########################################################
+        # poop emoji dumps the entire stack, not pretty, dont use #
+        ###########################################################
+        self.add_commands('partial(print, self._cells)()', '💩')
 
-def extract_emoji(filename):
-    data = ''
-    with open(filename) as bffile:
-        for line in bffile:
-            data += line
-    data = [char for char in data if char in command_equivalance.keys()]
-    code=''
-    for i in data:
-        code+=i
-    return code
 
-def make_py_code(code):
-    '''
-    alternative approach, generates and executes python code
-    '''
-    py_code = ''
-    indentation_level = 0
+    def add_commands(self, code, *commands):
+        '''
+        Takes the code that each command should represent
+        and at least one command
+        '''
+        if not commands:
+            return
 
-    suns = ['🌞', '☀']
-    moons = ['🌝', '🌑', '🌒', '🌓', \
-             '🌔', '🌕', '🌖', '🌗', \
-             '🌘', '🌙', '🌛', '🌜']
+        for command in commands:
+            self.equivalents[command] = code
 
-    used_flags = []
-    possible_flags = []
+    def extract_emoji(self, filename):
+        '''
+        parses the source file, taking only the emoji that
+        have defined behaviour into memory
+        '''
+        data = ''
+        with open(filename) as emojfile:
+            for line in emojfile:
+                data += line
+        data = [char for char in data if char in self.equivalents.keys()]
+        code=''
+        for i in data:
+            code+=i
+        return list(code)
 
-    with open('flags.txt', 'r') as flags_file:
-        for line in flags_file:
-            possible_flags += line.split(' ')
+    def make_py_code(self, code):
+        '''
+        alternative approach, generates and executes python code
+        '''
+        py_code = ''
+        indentation_level = 0
+
+        suns = ['🌞', '☀']
+        moons = ['🌝', '🌑', '🌒', '🌓', \
+                 '🌔', '🌕', '🌖', '🌗', \
+                 '🌘', '🌙', '🌛', '🌜']
     
-    #for some reason split adds a newline to the last flag so we get rid of it here
-    possible_flags[-1] = possible_flags[-1][:-1]
+
+        for character in code:
+            py_code += '    ' * indentation_level + self.equivalents[character] + '\n'
+            if character in suns:
+                indentation_level += 1
+            if character in moons:
+                indentation_level -= 1
     
-    for flag in possible_flags:
-        if flag in code:
-            code.replace(flag,ord(flag))
+        return py_code
 
-    for character in code:
-        py_code += '    ' * indentation_level + command_equivalance[character] + '\n'
-        if character in suns:
-            indentation_level += 1
-        if character in moons:
-            indentation_level -= 1
-
-    return py_code
-
-
+    def interpret_code(self, filename):
+        exec(self.make_py_code(self.extract_emoji(filename)))
 if __name__ == '__main__':
-    exec(make_py_code(extract_emoji(sys.argv[1])))
+    code_interpreter = Interpreter()
+    code_interpreter.interpret_code(sys.argv[1])
