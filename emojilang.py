@@ -3,6 +3,7 @@ from __future__ import print_function
 from collections import namedtuple
 from collections import defaultdict
 from functools import partial
+import argparse
 import random
 import sys
 
@@ -15,7 +16,7 @@ class MemoryState(object):
     '''
     def __init__(self):
         '''
-        Initializes the field of happiness
+        Initializes the Memory State
         '''
         ############################################################
         # we use default dict so that all cells go to zero         #
@@ -79,21 +80,21 @@ class MemoryState(object):
 
     def store_string_horizontally(self):
         string = input()
-        length = len(string)
+        starting_x = self.x
         for char in string:
             self.value = ord(char)
             self.x += 1
         self.value = 0
-        self.x -= length
+        self.x = starting_x
 
     def store_string_vertically(self):
         string = input()
-        length = len(string)
+        starting_y = self.y
         for char in string:
             self.value = ord(char)
             self.y += 1
         self.value = 0
-        self.y -= length
+        self.y = starting_y
     
     def set_value_number(self):
         self.value = int(input())
@@ -344,7 +345,7 @@ class Interpreter(MemoryState):
 
     def make_py_code(self, code):
         '''
-        alternative approach, generates and executes python code
+        generates python code equivalent to the 
         '''
         py_code = ''
         indentation_level = 0
@@ -364,8 +365,43 @@ class Interpreter(MemoryState):
     
         return py_code
 
-    def interpret_code(self, filename):
-        exec(self.make_py_code(self.extract_emoji(filename)))
-if __name__ == '__main__':
+    def interpret_code(self, filename, should_optimize = False):
+        '''
+        starting point for code optimization
+        '''
+        commands_list = self.extract_emoji(filename)
+
+        if should_optimize:
+            #TODO compression optimizations
+            pass
+
+        python_code = self.make_py_code(commands_list)
+        exec(python_code)
+
+def main():
+    '''
+    start of execution
+    '''
+    
+    #############################################################
+    # builds an argument parser to get the filename and whether #
+    # optimizations are wanted                                  #
+    #############################################################
+
+    parser = argparse.ArgumentParser(description='emoji based programming language')
+    parser.add_argument('-o', dest='should_optimize', action='store_const',
+                         const=True, default=False,
+                         help='should the code be optimized')
+    parser.add_argument('filename', metavar='filename', type=str,
+                        help='name of the file to be parsed')
+    args = parser.parse_args()
+
+
     code_interpreter = Interpreter()
-    code_interpreter.interpret_code(sys.argv[1])
+
+    code_interpreter.interpret_code(filename = args.filename,
+                                    should_optimize = args.should_optimize)
+    
+if __name__ == '__main__':
+    main()
+
