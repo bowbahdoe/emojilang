@@ -7,7 +7,7 @@ import random
 import sys
 
 
-Location = namedtuple('_Location',['x', 'y', 'z', 't'])
+Location = namedtuple('Location',['x', 'y', 'z', 't'])
 
 class MemoryState(object):
     '''
@@ -332,6 +332,10 @@ command_equivalance = {
 
 command_equivalance = defaultdict(lambda: '', command_equivalance)
 
+#Adds the moons to the dictionary
+[command_equivalance[i] for i in ['🌝', '🌑', '🌒', '🌓', \
+                                  '🌔', '🌕', '🌖', '🌗', \
+                                  '🌘', '🌙', '🌛', '🌜']]
 
 def extract_emoji(filename):
     data = ''
@@ -378,7 +382,7 @@ def make_py_code(code):
             indentation_level -= 1
 
     return py_code
-def main():
-    exec(make_py_code(extract_emoji(sys.argv[1])))
+
+
 if __name__ == '__main__':
     exec(make_py_code(extract_emoji(sys.argv[1])))
