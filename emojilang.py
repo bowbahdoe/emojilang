@@ -82,33 +82,18 @@ class MemoryState(object):
         length = len(string)
         for char in string:
             self.value = ord(char)
-            self.current_cell = Location(self.current_cell.x+1,
-                                         self.current_cell.y,
-                                         self.current_cell.z,
-                                         self.current_cell.t)
+            self.x += 1
         self.value = 0
-
-        self.current_cell = Location(self.current_cell.x-length,
-                                     self.current_cell.y,
-                                     self.current_cell.z,
-                                     self.current_cell.t)
+        self.x -= length
 
     def store_string_vertically(self):
         string = input()
         length = len(string)
         for char in string:
             self.value = ord(char)
-            self.current_cell = Location(self.current_cell.x,
-                                         self.current_cell.y+1,
-                                         self.current_cell.z,
-                                         self.current_cell.t)
+            self.y += 1
         self.value = 0
-
-        self.current_cell = Location(self.current_cell.x,
-                                     self.current_cell.y-length,
-                                     self.current_cell.z,
-                                     self.current_cell.t)
-
+        self.y -= length
 
     def print_value(self):
         print(self.value, end='', file=self.output)
