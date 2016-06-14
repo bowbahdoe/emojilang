@@ -6,7 +6,6 @@ from functools import partial
 import argparse
 import random
 import sys
-import ast
 
 Location = namedtuple('Location',['x', 'y', 'z', 't'])
 
