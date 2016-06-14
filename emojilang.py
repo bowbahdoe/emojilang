@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import namedtuple
 from collections import defaultdict
@@ -6,6 +7,7 @@ from functools import partial
 import argparse
 import random
 import sys
+import io
 
 Location = namedtuple('Location',['x', 'y', 'z', 't'])
 
@@ -130,7 +132,7 @@ class Interpreter(MemoryState):
         also builds the list of commands
         '''
         
-        super().__init__()
+        super(Interpreter, self).__init__()
 
         self.equivalents = {}
         
@@ -138,99 +140,99 @@ class Interpreter(MemoryState):
         # Happy emojis add one to the value at the location, #
         # sad emojis subtract                                #
         ######################################################
-        self.add_commands('self.value += 1', '😃', '😄')
-        self.add_commands('self.value -= 1', '☹')
+        self.add_commands('self.value += 1', u'😃', u'😄')
+        self.add_commands('self.value -= 1', u'☹')
 
         ########################################################
         # Fruits and veggies add one, unhealthy foods subtract #
         ########################################################
-        self.add_commands('self.value += 1', '🍏', '🍎', '🍐', '🍊',
-                                             '🍋', '🍌', '🍉', '🍇',
-                                             '🍓', '🍈', '🍒', '🍑',
-                                             '🍍', '🍅', '🍆', '🌶',
-                                             '🌽')
+        self.add_commands('self.value += 1', u'🍏', u'🍎', u'🍐', u'🍊',
+                                             u'🍋', u'🍌', u'🍉', u'🍇',
+                                             u'🍓', u'🍈', u'🍒', u'🍑',
+                                             u'🍍', u'🍅', u'🍆', u'🌶',
+                                             u'🌽')
 
-        self.add_commands('self.value -= 1', '🍠', '🍯', '🍞', '🧀',
-                                             '🍗', '🍖', '🍤', '🍳',
-                                             '🍔', '🍟', '🌭', '🍕',
-                                             '🍝', '🌮', '🌯', '🍜',
-                                             '🍲', '🍥', '🍣', '🍱',
-                                             '🍛', '🍙', '🍚', '🍘',
-                                             '🍢', '🍡', '🍧', '🍨',
-                                             '🍦', '🍰', '🎂', '🍮',
-                                             '🍬', '🍭', '🍫', '🍿',
-                                             '🍩', '🍪')
+        self.add_commands('self.value -= 1', u'🍠', u'🍯', u'🍞', u'🧀',
+                                             u'🍗', u'🍖', u'🍤', u'🍳',
+                                             u'🍔', u'🍟', u'🌭', u'🍕',
+                                             u'🍝', u'🌮', u'🌯', u'🍜',
+                                             u'🍲', u'🍥', u'🍣', u'🍱',
+                                             u'🍛', u'🍙', u'🍚', u'🍘',
+                                             u'🍢', u'🍡', u'🍧', u'🍨',
+                                             u'🍦', u'🍰', u'🎂', u'🍮',
+                                             u'🍬', u'🍭', u'🍫', u'🍿',
+                                             u'🍩', u'🍪')
 
         #####################################################
         # alcohol is really bad for you, so it subtracts 10 #
         #####################################################
 
-        self.add_commands('self.value -= 10', '🍺','🍻','🍷','🍸',
-                                              '🍹','🍾')
+        self.add_commands('self.value -= 10', u'🍺', u'🍻', u'🍷', u'🍸',
+                                              u'🍹', u'🍾')
 
         ################################################
         # the joy emoji squares the value at the point #
         ################################################
 
-        self.add_commands('self.value **= 2', '😂')
+        self.add_commands('self.value **= 2', u'😂')
 
         ##############################################    
         # construction worker sets the working value #
         # as the value in the current cell           #
         ##############################################
 
-        self.add_commands('self.working_value = self.value', '👷')
+        self.add_commands('self.working_value = self.value', u'👷')
 
         ##################################################
         # the scream emoji sets the x coordinate to zero #
         ##################################################
-        self.add_commands('self.x = 0', '😱')
+        self.add_commands('self.x = 0', u'😱')
 
         ###############################################
         # right and left pointing move right and left #
         ###############################################
-        self.add_commands('self.x += 1', '👉')
-        self.add_commands('self.x -= 1', '👈')
+        self.add_commands('self.x += 1', u'👉')
+        self.add_commands('self.x -= 1', u'👈')
 
         ################################################
         # pointing up goes up, pointing down goes down #
         ################################################
 
-        self.add_commands('self.y += 1', '🖕', '☝', '👆', '👍')
-        self.add_commands('self.y -= 1', '👇', '👎')
+        self.add_commands('self.y += 1', u'🖕', u'☝', u'👆', u'👍')
+        self.add_commands('self.y -= 1', u'👇', u'👎')
 
         ######################################
         # upleft arrow goes upleft and so on #
         ######################################
-        self.add_commands('self.y += 1; self.x -= 1', '↖')
-        self.add_commands('self.y += 1; self.x += 1', '↗')
-        self.add_commands('self.y += 1; self.x += 1', '↗')
-        self.add_commands('self.y -= 1; self.x += 1', '↘')
-        self.add_commands('self.y -= 1; self.x -= 1', '↙')
+        self.add_commands('self.y += 1; self.x -= 1', u'↖')
+        self.add_commands('self.y += 1; self.x += 1', u'↗')
+        self.add_commands('self.y += 1; self.x += 1', u'↗')
+        self.add_commands('self.y -= 1; self.x += 1', u'↘')
+        self.add_commands('self.y -= 1; self.x -= 1', u'↙')
 
         ######################################################
         # double arrows move two in the direction they point #
         ######################################################
 
-        self.add_commands('self.y += 2', '⏫')
-        self.add_commands('self.y -= 2', '⏬')
+        self.add_commands('self.y += 2', u'⏫')
+        self.add_commands('self.y -= 2', u'⏬')
 
         ####################################
         # punching fist increases z by one #
         # okay sign decreases z by one     #
         ####################################
 
-        self.add_commands('self.z += 1', '👊')
-        self.add_commands('self.z -= 1', '👌')
+        self.add_commands('self.z += 1', u'👊')
+        self.add_commands('self.z -= 1', u'👌')
 
         #########################################################
         # hourglass and clocks go forwards in time              #
         # The Man in buisness suit levitating goes back in time #
         #########################################################
         
-        self.add_commands('self.t += 1', '⌛', '⏳', '⏱', '⏰', 
-                                          '⌚', '⏲', '🕰')
-        self.add_commands('self.t -= 1', '🕴')
+        self.add_commands('self.t += 1', u'⌛', u'⏳', u'⏱', u'⏰', 
+                                         u'⌚', u'⏲', u'🕰')
+        self.add_commands('self.t -= 1', u'🕴')
 
         ######################################################
         # sleepy face and open mouth surprised face store    #
@@ -241,15 +243,15 @@ class Interpreter(MemoryState):
         # string)                                            #
         ######################################################
         
-        self.add_commands('self.store_string_vertically()', '😪')
-        self.add_commands('self.store_string_horizontally()', '😮')
+        self.add_commands('self.store_string_vertically()', u'😪')
+        self.add_commands('self.store_string_horizontally()', u'😮')
 
         #########################################################
         # thinking face waits for a number and stores it in the #
         # current cell                                          #
         #########################################################
 
-        self.add_commands('self.set_value_number()', '🤔')
+        self.add_commands('self.set_value_number()', u'🤔')
 
         ##################################################
         # four leafed clover puts a random value between #
@@ -259,30 +261,29 @@ class Interpreter(MemoryState):
         # and 6 in the cell                              #
         ##################################################
 
-        self.add_commands('self.value = random.randrange(0, self.value + 1)', '🍀')
-        self.add_commands('self.value = random.randrange(1, 7)','🎲')
+        self.add_commands('self.value = random.randrange(0, self.value + 1)', u'🍀')
+        self.add_commands('self.value = random.randrange(1, 7)', u'🎲')
 
         ##############################################
         # construction worker sets the working value #
         # as the value in the current cell           #
         ##############################################
 
-        self.add_commands('self.working_value = self.value','👷')
+        self.add_commands('self.working_value = self.value', u'👷')
 
         ####################################################
         # two people holding hands adds the current cell   #
         # to the working value and stores that in the cell #
         ####################################################
         
-        self.add_commands('self.value += self.working_value',
-                          '👫', '👬', '👭')
+        self.add_commands('self.value += self.working_value', u'👫', u'👬', u'👭')
 
         ####################################################
         # two people kissing multiplies the current cell   #
         # to the working value and stores that in the cell #
         ####################################################
 
-        self.add_commands('self.value *= self.working_value', '💏')
+        self.add_commands('self.value *= self.working_value', u'💏')
 
 
         ######################################################
@@ -295,10 +296,10 @@ class Interpreter(MemoryState):
         #                                                    #
         ######################################################
 
-        self.add_commands('while self.value != 0:', '🌞', '☀')
-        self.add_commands('', '🌝', '🌑', '🌒', '🌓', 
-                              '🌔', '🌕', '🌖', '🌗',
-                              '🌘', '🌙', '🌛', '🌜')
+        self.add_commands('while self.value != 0:', u'🌞', u'☀')
+        self.add_commands('', u'🌝', u'🌑', u'🌒', u'🌓', 
+                              u'🌔', u'🌕', u'🌖', u'🌗',
+                              u'🌘', u'🌙', u'🌛', u'🌜')
         ##########################################################
         # Kissy face prints out the value as ASCII               #
         # Winky face prints a newline                            #
@@ -306,14 +307,14 @@ class Interpreter(MemoryState):
         # because nerds and numbers amiright                     #
         ##########################################################
 
-        self.add_commands('self.print_as_ASCII()', '😘')
-        self.add_commands('print(file=self.output)', '😉')
-        self.add_commands('print(self.value, end=\'\', file=self.output)', '🤓')
+        self.add_commands('self.print_as_ASCII()', u'😘')
+        self.add_commands('print(file=self.output)', u'😉')
+        self.add_commands('print(self.value, end=\'\', file=self.output)', u'🤓')
 
         ###########################################################
         # poop emoji dumps the entire stack, not pretty, dont use #
         ###########################################################
-        self.add_commands('partial(print, self._cells)()', '💩')
+        self.add_commands('partial(print, self._cells)()', u'💩')
 
 
     def add_commands(self, code, *commands):
@@ -333,9 +334,10 @@ class Interpreter(MemoryState):
         have defined behaviour into memory
         '''
         data = ''
-        with open(filename) as emojfile:
+        with io.open(filename, encoding="utf-8") as emojfile:
             for line in emojfile:
                 data += line
+
         data = [char for char in data if char in self.equivalents.keys()]
         code=''
         for i in data:
@@ -349,10 +351,10 @@ class Interpreter(MemoryState):
         py_code = ''
         indentation_level = 0
 
-        suns = ['🌞', '☀']
-        moons = ['🌝', '🌑', '🌒', '🌓', \
-                 '🌔', '🌕', '🌖', '🌗', \
-                 '🌘', '🌙', '🌛', '🌜']
+        suns = [u'🌞', u'☀']
+        moons = [u'🌝', u'🌑', u'🌒', u'🌓', \
+                 u'🌔', u'🌕', u'🌖', u'🌗', \
+                 u'🌘', u'🌙', u'🌛', u'🌜']
     
 
         for character in code:
@@ -376,9 +378,9 @@ class Interpreter(MemoryState):
         incrementers = []
         decrementers = []
         for key in self.equivalents:
-            if self.equivalents[key] == self.equivalents['😃']:
+            if self.equivalents[key] == self.equivalents[u'😃']:
                 incrementers.append(key)
-            elif self.equivalents[key] == self.equivalents['☹']:
+            elif self.equivalents[key] == self.equivalents[u'☹']:
                 decrementers.append(key)
 
         #####################################################
@@ -436,7 +438,6 @@ class Interpreter(MemoryState):
 
         if should_optimize:
             commands_list = self.compress_optimize(commands_list)
-        print(commands_list)
         python_code = self.make_py_code(commands_list)
         exec(python_code)
 
@@ -457,8 +458,7 @@ def main():
     parser.add_argument('filename', metavar='filename', type=str,
                         help='name of the file to be parsed')
     args = parser.parse_args()
-
-
+    
     code_interpreter = Interpreter()
 
     code_interpreter.interpret_code(filename = args.filename,
