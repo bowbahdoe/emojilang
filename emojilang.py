@@ -420,7 +420,7 @@ class Interpreter(MemoryState):
                 current_total += command
             else:
                 optimized_commands.append(command)
-        if current_total > 0:
+        if abs(current_total) > 0:
             optimized_commands.append(current_total)
 
         ###############################################################
