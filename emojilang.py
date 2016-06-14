@@ -28,45 +28,45 @@ class MemoryState(object):
         ############################################################
 
         self._cells = defaultdict(lambda: 0)
-        self._current_cell = Location(0,0,0,0)
-        self._working_value = 0
+        self.current_cell = Location(0,0,0,0)
+        self.working_value = 0
         self.output = sys.stdout
 
     
     def get_x(self):
-        return self._current_cell.x
+        return self.current_cell.x
 
     def set_x(self, new_x):
         self.current_cell = Location(new_x,
-                                     self._current_cell.y,
-                                     self._current_cell.z,
-                                     self._current_cell.t)
+                                     self.current_cell.y,
+                                     self.current_cell.z,
+                                     self.current_cell.t)
 
     def get_y(self):
         return self.current_cell.y
 
     def set_y(self, new_y):
-        self.current_cell = Location(self._current_cell.x,
+        self.current_cell = Location(self.current_cell.x,
                                      new_y,
-                                     self._current_cell.z,
-                                     self._current_cell.t)
+                                     self.current_cell.z,
+                                     self.current_cell.t)
     def get_z(self):
         return self.current_cell.z
 
     def set_z(self, new_z):
-        self.current_cell = Location(self._current_cell.x,
-                                     self._current_cell.y,
+        self.current_cell = Location(self.current_cell.x,
+                                     self.current_cell.y,
                                      new_z,
-                                     self._current_cell.t)
+                                     self.current_cell.t)
 
 
     def get_time(self):
         return self.current_cell.t
 
     def set_time(self, new_time):
-        self.current_cell = Location(self._current_cell.x,
-                                     self._current_cell.y,
-                                     self._current_cell.z,
+        self.current_cell = Location(self.current_cell.x,
+                                     self.current_cell.y,
+                                     self.current_cell.z,
                                      new_time)
         
 
@@ -101,26 +101,10 @@ class MemoryState(object):
         self.value = int(input())
 
     def _get_value(self):
-        return self._cells[self._current_cell]
+        return self._cells[self.current_cell]
 
     def _set_value(self, new_value):
-        self._cells[self._current_cell] = new_value
-    
-    def _get_current_cell(self):
-        return self._current_cell
-    
-    def _set_current_cell(self, new_cell):
-        self._current_cell = new_cell
-
-    def _get_working_value(self):
-        return self._working_value
-
-    def _set_working_value(self, new_value):
-        self._working_value = new_value
-
-    working_value = property(_get_working_value, _set_working_value)
-
-    current_cell = property(_get_current_cell, _set_current_cell)
+        self._cells[self.current_cell] = new_value
 
     value = property(_get_value, _set_value)
 
