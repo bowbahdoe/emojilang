@@ -6,7 +6,7 @@ from functools import partial
 import argparse
 import random
 import sys
-
+import ast
 
 Location = namedtuple('Location',['x', 'y', 'z', 't'])
 
@@ -345,7 +345,7 @@ class Interpreter(MemoryState):
 
     def make_py_code(self, code):
         '''
-        generates python code equivalent to the 
+        generates python code equivalent to the emoji fed to it 
         '''
         py_code = ''
         indentation_level = 0
@@ -365,6 +365,70 @@ class Interpreter(MemoryState):
     
         return py_code
 
+
+    def compress_optimize(self, commands_list):
+        
+        ######################################################
+        # We go through the dictionary of commands and keep  #
+        # track of what has the same behaviour of smiles and #
+        # frowns                                             #
+        ######################################################
+
+        incrementers = []
+        decrementers = []
+        for key in self.equivalents:
+            if self.equivalents[key] == self.equivalents['😃']:
+                incrementers.append(key)
+            elif self.equivalents[key] == self.equivalents['☹']:
+                decrementers.append(key)
+
+        #####################################################
+        # Then we replace everything that increments with a #
+        # positive 1 and everything that decrements with a  #
+        # negative 1                                        #
+        #####################################################
+
+        for index, command in enumerate(commands_list):
+            if command in incrementers:
+                commands_list[index] = 1
+            elif command in decrementers:
+                commands_list[index] = -1
+
+        #################################################################
+        # goes through the list of commands and compresses every string #
+        # of increments and decrements with the equivalent sum of those #
+        #                                                               #
+        # we also hardcoded the joy emoji and dealt with squaring aot   #
+        # should it come right after some inc/decrements                #
+        #################################################################
+
+        optimized_commands = []
+        current_total = 0
+        for command in commands_list:
+            if command == '😂':
+                current_total **= 2
+            elif type(command) == str and abs(current_total) > 0:
+                optimized_commands.append(current_total)
+                optimized_commands.append(command)
+                current_total = 0
+            elif type(command) == int:
+                current_total += command
+            else:
+                optimized_commands.append(command)
+        if current_total > 0:
+            optimized_commands.append(current_total)
+
+        ###############################################################
+        # To simplify matters, we add the simplified integer value to #
+        # the dictionary with a corresponding command to change value #
+        ###############################################################
+        for command in set(optimized_commands):
+            if type(command) == int:
+                self.add_commands('self.value += {0}'.format(command), command)
+
+        return optimized_commands
+
+        
     def interpret_code(self, filename, should_optimize = False):
         '''
         starting point for code optimization
@@ -372,9 +436,8 @@ class Interpreter(MemoryState):
         commands_list = self.extract_emoji(filename)
 
         if should_optimize:
-            #TODO compression optimizations
-            pass
-
+            commands_list = self.compress_optimize(commands_list)
+        print(commands_list)
         python_code = self.make_py_code(commands_list)
         exec(python_code)
 
