@@ -401,14 +401,18 @@ class Interpreter(MemoryState):
         #                                                               #
         # we also hardcoded the joy emoji and dealt with squaring aot   #
         # should it come right after some inc/decrements                #
+        #                                                               #
+        # in python2 str is not the same as a unicode string and in     #
+        # python3 unicode is not defined, so we just look for something #
+        # that is NOT an int, which matches both cases                  #
         #################################################################
 
         optimized_commands = []
         current_total = 0
         for command in commands_list:
-            if command == '😂':
+            if command == u'😂':
                 current_total **= 2
-            elif type(command) == str and abs(current_total) > 0:
+            elif type(command) != int and abs(current_total) > 0:
                 optimized_commands.append(current_total)
                 optimized_commands.append(command)
                 current_total = 0
