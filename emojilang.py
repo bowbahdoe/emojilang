@@ -271,16 +271,19 @@ class Interpreter(MemoryState):
 
 
         ######################################################
-        # sun and full moon w/ face start and close loops    # 
+        # sun and full moon  start and close loops           # 
         # where it loops if the value at the end is not zero #
+        #                                                    #
+        # The earth functions as a start to an if block and  #
+        # is closed by a moon                                #
         #                                                    #
         # logic of moons is dealt with with decrementing     #
         # indents so we dont worry about it here and just    #
         # add it to the list of commands                     #
-        #                                                    #
         ######################################################
 
         self.add_commands('while self.value != 0:', u'🌞', u'☀')
+        self.add_commands('if self.value:', u'🌍', u'🌏', u'🌎') 
         self.add_commands('', u'🌝', u'🌑', u'🌒', u'🌓', 
                               u'🌔', u'🌕', u'🌖', u'🌗',
                               u'🌘', u'🌙', u'🌛', u'🌜')
@@ -336,6 +339,7 @@ class Interpreter(MemoryState):
         indentation_level = 0
 
         suns = [u'🌞', u'☀']
+        earths = [ u'🌍', u'🌏', u'🌎']
         moons = [u'🌝', u'🌑', u'🌒', u'🌓', \
                  u'🌔', u'🌕', u'🌖', u'🌗', \
                  u'🌘', u'🌙', u'🌛', u'🌜']
@@ -343,7 +347,7 @@ class Interpreter(MemoryState):
 
         for character in code:
             py_code += '    ' * indentation_level + self.equivalents[character] + '\n'
-            if character in suns:
+            if character in suns + earths:
                 indentation_level += 1
             if character in moons:
                 indentation_level -= 1
@@ -383,9 +387,6 @@ class Interpreter(MemoryState):
         # goes through the list of commands and compresses every string #
         # of increments and decrements with the equivalent sum of those #
         #                                                               #
-        # we also hardcoded the joy emoji and dealt with squaring aot   #
-        # should it come right after some inc/decrements                #
-        #                                                               #
         # in python2 str is not the same as a unicode string and in     #
         # python3 unicode is not defined, so we just look for something #
         # that is NOT an int, which matches both cases                  #
@@ -394,8 +395,6 @@ class Interpreter(MemoryState):
         optimized_commands = []
         current_total = 0
         for command in commands_list:
-            if command == u'😂':
-                current_total **= 2
             elif type(command) != int and abs(current_total) > 0:
                 optimized_commands.append(current_total)
                 optimized_commands.append(command)
