@@ -395,7 +395,7 @@ class Interpreter(MemoryState):
         optimized_commands = []
         current_total = 0
         for command in commands_list:
-            elif type(command) != int and abs(current_total) > 0:
+            if type(command) != int and abs(current_total) > 0:
                 optimized_commands.append(current_total)
                 optimized_commands.append(command)
                 current_total = 0
