@@ -9,6 +9,7 @@ import random
 import sys
 import io
 
+
 Location = namedtuple('Location',['x', 'y', 'z', 't'])
 
 class MemoryState(object):
@@ -326,10 +327,10 @@ class Interpreter(MemoryState):
                 data += line
 
         data = [char for char in data if char in self.equivalents.keys()]
-        code=''
+        code = []
         for i in data:
-            code+=i
-        return list(code)
+            code.append(i)
+        return code
 
     def make_py_code(self, code):
         '''
