@@ -120,6 +120,8 @@ class Interpreter(MemoryState):
         super(Interpreter, self).__init__()
 
         self.equivalents = {}
+        self.block_starters = set()
+        self.block_enders = set()
         
         ######################################################
         # Happy emojis add one to the value at the location, #
@@ -283,11 +285,11 @@ class Interpreter(MemoryState):
         # add it to the list of commands                     #
         ######################################################
 
-        self.add_commands('while self.value != 0:', u'🌞', u'☀')
-        self.add_commands('if self.value:', u'🌍', u'🌏', u'🌎') 
+        self.add_commands('while self.value != 0:', u'🌞', u'☀', block_starter = True)
+        self.add_commands('if self.value:', u'🌍', u'🌏', u'🌎', block_starter = True) 
         self.add_commands('', u'🌝', u'🌑', u'🌒', u'🌓', 
                               u'🌔', u'🌕', u'🌖', u'🌗',
-                              u'🌘', u'🌙', u'🌛', u'🌜')
+                              u'🌘', u'🌙', u'🌛', u'🌜', block_ender = True)
         ##########################################################
         # Kissy face prints out the value as ASCII               #
         # Winky face prints a newline                            #
@@ -305,16 +307,22 @@ class Interpreter(MemoryState):
         self.add_commands('partial(print, self._cells)()', u'💩')
 
 
-    def add_commands(self, code, *commands):
+    def add_commands(self, code, *commands, block_starter=False, block_ender=False):
         '''
         Takes the code that each command should represent
         and at least one command
         '''
+        assert not (block_starter and block_ender), 'Code cannot both start and end a block'
+
         if not commands:
             return
 
         for command in commands:
             self.equivalents[command] = code
+            if block_starter:
+                self.block_starters.add(command)
+            elif block_ender:
+                self.block_enders.add(command)
 
     def extract_emoji(self, filename):
         '''
@@ -326,10 +334,7 @@ class Interpreter(MemoryState):
             for line in emojfile:
                 data += line
 
-        data = [char for char in data if char in self.equivalents.keys()]
-        code = []
-        for i in data:
-            code.append(i)
+        code = [char for char in data if char in self.equivalents.keys()]
         return code
 
     def make_py_code(self, code):
@@ -339,18 +344,11 @@ class Interpreter(MemoryState):
         py_code = ''
         indentation_level = 0
 
-        suns = [u'🌞', u'☀']
-        earths = [ u'🌍', u'🌏', u'🌎']
-        moons = [u'🌝', u'🌑', u'🌒', u'🌓', \
-                 u'🌔', u'🌕', u'🌖', u'🌗', \
-                 u'🌘', u'🌙', u'🌛', u'🌜']
-    
-
         for character in code:
             py_code += '    ' * indentation_level + self.equivalents[character] + '\n'
-            if character in suns + earths:
+            if character in self.block_starters:
                 indentation_level += 1
-            if character in moons:
+            if character in self.block_enders:
                 indentation_level -= 1
     
         return py_code
@@ -366,6 +364,7 @@ class Interpreter(MemoryState):
 
         incrementers = []
         decrementers = []
+        
         for key in self.equivalents:
             if self.equivalents[key] == self.equivalents[u'😃']:
                 incrementers.append(key)
