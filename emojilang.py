@@ -304,7 +304,7 @@ class Interpreter(MemoryState):
         ######################################################
 
         self.add_commands('while self.value != 0:', u'🌞', u'☀', block_starter = True)
-        self.add_commands('if self.value:', u'🌍', u'🌏', u'🌎', block_starter = True)
+        self.add_commands('if self.value != 0:', u'🌍', u'🌏', u'🌎', block_starter = True)
         self.add_commands('if self.value > self.working_value:', u'😇', block_starter = True)
         self.add_commands('if self.value < self.working_value:', u'😈', block_starter = True)
         self.add_commands('else:', u'😒', block_starter = True, block_ender = True)
@@ -328,7 +328,7 @@ class Interpreter(MemoryState):
         self.add_commands('partial(print, self._cells)()', u'💩')
 
 
-    def add_commands(self, code, *commands, block_starter=False, block_ender=False):
+    def add_commands(self, code, *commands, block_starter = False, block_ender = False):
         '''
         Takes the code that each command should represent
         and at least one command
@@ -375,7 +375,6 @@ class Interpreter(MemoryState):
                 indentation_level += 1
                 py_code += '    ' * indentation_level + 'pass\n'
 
-        print(py_code)
         return py_code
 
 
@@ -442,7 +441,8 @@ class Interpreter(MemoryState):
         return optimized_commands
 
         
-    def interpret_code(self, filename, should_optimize = False):
+    def interpret_code(self, filename, should_optimize = False,
+                                       should_print_code = False):
         '''
         starting point for code optimization
         '''
@@ -450,7 +450,12 @@ class Interpreter(MemoryState):
 
         if should_optimize:
             commands_list = self.compress_optimize(commands_list)
+
         python_code = self.make_py_code(commands_list)
+        
+        if should_print_code:
+            print(python_code)
+
         exec(python_code)
 
 def main():
@@ -467,6 +472,9 @@ def main():
     parser.add_argument('-o', dest='should_optimize', action='store_const',
                          const=True, default=False,
                          help='should the code be optimized')
+    parser.add_argument('-d', dest='should_print_code', action='store_const',
+                         const=True, default=False,
+                         help='should the code be printed once generated')
     parser.add_argument('filename', metavar='filename', type=str,
                         help='name of the file to be parsed')
     args = parser.parse_args()
@@ -474,7 +482,8 @@ def main():
     code_interpreter = Interpreter()
 
     code_interpreter.interpret_code(filename = args.filename,
-                                    should_optimize = args.should_optimize)
+                                    should_optimize = args.should_optimize,
+                                    should_print_code = args.should_print_code)
     
 if __name__ == '__main__':
     main()
