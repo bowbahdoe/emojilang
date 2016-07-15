@@ -448,7 +448,7 @@ Enter the second number:
 
 😃😃😃😃😃😃😃😃😃😃
 😃😃😃😃😃😃😃😃😃😃
-😃😃😃😃😃😃😃😃😃😃
+😃😃😃😃😃😃😃����😃😃
 😃😃👉
 
 😃😃😃😃😃😃😃😃😃😃
@@ -546,3 +546,55 @@ and the second in Cell 1,0,0,0 (x,y,z,t)
 
 
 Now if the first number is less than the second we switch them
+
+👷👈 working_value = Cell 1,0,0,0 current_cell = Cell 0,0,0,0
+
+if Cell 1,0 is > Cell 0,0
+😈
+    copy cell 1 two to the right
+    👷👉👉👫
+    copy cell 2 one to its left
+    👈👷👈😭👫
+    and move that copy of cell 1 to the original place of cell 2
+    👉👉👷👈😭👫
+    and zero the duplicate for good measure
+    👉😭
+    then move back to 0,0,0,0
+    👈👈
+🌝
+
+
+
+Set the working value as the remainder of cell 2 / cell 1
+🌞
+
+    set cell 1 to the working value and move to cell 2
+    👷👉
+    
+    Set the working value as the remainder of cell 2 / cell 1
+    🍕
+    Then put that remainder in cell 3
+    👉👉😭👫
+    
+    Then we shift cell 1 <- cell 2 and cell 2 <- cell 3
+    👈👷👈😭👫
+    👉👉👷👈😭👫
+
+    🌍
+    if cell 2 is not zero, move back to cell 1
+        👈
+    😒
+    else break out of loop by moving up
+        👆
+    🌝
+
+🌝
+
+move back down and to the left
+
+↙
+
+print the answer
+
+🤓😘
+

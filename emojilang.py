@@ -10,7 +10,7 @@ import sys
 import io
 
 
-Location = namedtuple('Location',['x', 'y', 'z', 't'])
+Location = namedtuple('Location', ['x', 'y', 'z', 't'])
 
 class MemoryState(object):
     '''
@@ -162,7 +162,13 @@ class Interpreter(MemoryState):
         ################################################
 
         self.add_commands('self.value **= 2', u'😂')
-
+        
+        #########################################
+        # weeping face zeroes the current value #
+        #########################################
+        
+        self.add_commands('self.value = 0', u'😭')
+        
         ##############################################    
         # construction worker sets the working value #
         # as the value in the current cell           #
@@ -271,6 +277,13 @@ class Interpreter(MemoryState):
         ####################################################
 
         self.add_commands('self.value *= self.working_value', u'💏')
+        
+        ################################################################
+        # a slice of pizza sets working value to the remainder         #
+        # of the division between that cell and the working value      #
+        ################################################################
+        
+        self.add_commands('self.working_value = self.working_value % self.value', u'🍕')
 
 
         ######################################################
@@ -279,14 +292,22 @@ class Interpreter(MemoryState):
         #                                                    #
         # The earth functions as a start to an if block and  #
         # is closed by a moon                                #
+        #                                                    #  
+        # The angel tests if the value is greater than the   #
+        # working value and the devil tests if it is less    #
+        # than the working value                             #
         #                                                    #
-        # logic of moons is dealt with with decrementing     #
-        # indents so we dont worry about it here and just    #
-        # add it to the list of commands                     #
+        # The eyes off to the side is an else block, and     #
+        # must come after an if block                        #
+        #                                                    #
+        # moons end blocks with no side effects              #
         ######################################################
 
         self.add_commands('while self.value != 0:', u'🌞', u'☀', block_starter = True)
-        self.add_commands('if self.value:', u'🌍', u'🌏', u'🌎', block_starter = True) 
+        self.add_commands('if self.value:', u'🌍', u'🌏', u'🌎', block_starter = True)
+        self.add_commands('if self.value > self.working_value:', u'😇', block_starter = True)
+        self.add_commands('if self.value < self.working_value:', u'😈', block_starter = True)
+        self.add_commands('else:', u'😒', block_starter = True, block_ender = True)
         self.add_commands('', u'🌝', u'🌑', u'🌒', u'🌓', 
                               u'🌔', u'🌕', u'🌖', u'🌗',
                               u'🌘', u'🌙', u'🌛', u'🌜', block_ender = True)
@@ -312,7 +333,6 @@ class Interpreter(MemoryState):
         Takes the code that each command should represent
         and at least one command
         '''
-        assert not (block_starter and block_ender), 'Code cannot both start and end a block'
 
         if not commands:
             return
@@ -321,7 +341,7 @@ class Interpreter(MemoryState):
             self.equivalents[command] = code
             if block_starter:
                 self.block_starters.add(command)
-            elif block_ender:
+            if block_ender:
                 self.block_enders.add(command)
 
     def extract_emoji(self, filename):
@@ -345,12 +365,17 @@ class Interpreter(MemoryState):
         indentation_level = 0
 
         for character in code:
-            py_code += '    ' * indentation_level + self.equivalents[character] + '\n'
-            if character in self.block_starters:
-                indentation_level += 1
             if character in self.block_enders:
                 indentation_level -= 1
-    
+
+            #This line is snuggled in here to make else clauses work right
+            py_code += '    ' * indentation_level + self.equivalents[character] + '\n'
+            
+            if character in self.block_starters:
+                indentation_level += 1
+                py_code += '    ' * indentation_level + 'pass\n'
+
+        print(py_code)
         return py_code
 
 
