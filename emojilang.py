@@ -210,6 +210,7 @@ class Interpreter(MemoryState):
         self.add_commands('self.y += 2', u'⏫')
         self.add_commands('self.y -= 2', u'⏬')
 
+
         ####################################
         # punching fist increases z by one #
         # okay sign decreases z by one     #
@@ -279,11 +280,12 @@ class Interpreter(MemoryState):
         self.add_commands('self.value *= self.working_value', u'💏')
         
         ################################################################
-        # a slice of pizza sets working value to the remainder         #
+        # unicorn and horse set working value to the remainder         #
         # of the division between that cell and the working value      #
         ################################################################
         
-        self.add_commands('self.working_value = self.working_value % self.value', u'🍕')
+        self.add_commands('self.working_value = self.working_value % self.value',
+                                                             u'🦄', u'🐴', u'🐎')
 
 
         ######################################################
