@@ -34,37 +34,37 @@ class MemoryState(object):
         self.output = sys.stdout
 
     
-    def get_x(self):
+    def _get_x(self):
         return self.current_cell.x
 
-    def set_x(self, new_x):
+    def _set_x(self, new_x):
         self.current_cell = Location(new_x,
                                      self.current_cell.y,
                                      self.current_cell.z,
                                      self.current_cell.t)
 
-    def get_y(self):
+    def _get_y(self):
         return self.current_cell.y
 
-    def set_y(self, new_y):
+    def _set_y(self, new_y):
         self.current_cell = Location(self.current_cell.x,
                                      new_y,
                                      self.current_cell.z,
                                      self.current_cell.t)
-    def get_z(self):
+    def _get_z(self):
         return self.current_cell.z
 
-    def set_z(self, new_z):
+    def _set_z(self, new_z):
         self.current_cell = Location(self.current_cell.x,
                                      self.current_cell.y,
                                      new_z,
                                      self.current_cell.t)
 
 
-    def get_time(self):
+    def _get_time(self):
         return self.current_cell.t
 
-    def set_time(self, new_time):
+    def _set_time(self, new_time):
         self.current_cell = Location(self.current_cell.x,
                                      self.current_cell.y,
                                      self.current_cell.z,
@@ -72,10 +72,10 @@ class MemoryState(object):
         
 
     #sets up the dimensions as properties    
-    x = property(get_x, set_x)
-    y = property(get_y, set_y)
-    z = property(get_z, set_z)
-    t = property(get_time, set_time)
+    x = property(_get_x, _set_x)
+    y = property(_get_y, _set_y)
+    z = property(_get_z, _set_z)
+    t = property(_get_time, _set_time)
 
     def print_as_ASCII(self):
         print(chr(self.value), end='', file=self.output)
